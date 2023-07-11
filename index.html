@@ -79,9 +79,9 @@
         <section>
           <h3>Secure Boot Intro <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft">
-            Secure boot is a boot sequence on a hardware device where each
-            software/firmware image loaded is authorized to be executed using
-            software previously authorized by this system
+            A boot sequence on a hardware device where each software image
+            loaded is authorized to be executed using software previously
+            authorized by this system
             <ul>
               <li>
               Once enabled, secure boot ensures that only signed firmware run on
@@ -306,8 +306,11 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
             <ul>
               <li>Thistle Technologies for supporting this work</li>
               <li>My Thistle colleagues for their feedback</li>
+              <li><a href="https://github.com/pldubouilh"
+              onclick="window.open(this.href); return false;">Pierre Dubouilh</a>
+              for telling me about Espressif DevCon</li>
               <li><a href="https://github.com/toru"
-              onclick="window.open(this.href); return false;"> Toru Maesaka</a>
+              onclick="window.open(this.href); return false;">Toru Maesaka</a>
               and <a href="https://github.com/russellchapin"
               onclick="window.open(this.href); return false;">Russell
               Chapin</a>, for helping build the production firmware signing
@@ -316,6 +319,10 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
             </ul>
           </div>
           <img src="img/thistle-logo.png" alt="Thistle Technologies" width="25%" />
+          <div style="font-size: 0.5em;">
+            This presentation is available at <a
+            href="https://thistletech.github.io/esp-devcon23-sbv2-talk">thistletech.github.io/esp-devcon23-sbv2-talk</a>
+          </div>
         </section>
 
       </div>
