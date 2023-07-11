@@ -1,0 +1,342 @@
+<!doctype html>
+<html>
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-94XS2SB0TX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-94XS2SB0TX');
+    </script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="keywords" content="ESP32, ESP32-S2, ESP32-S3, Secure Boot V2" />
+    <meta name="DC.title" content="ESP32 Secure Boot V2 Enablement" />
+    <meta name="description" content="Presentation for Espressif DevCon 2023" />
+
+    <title>Enabling Secure Boot V2 on ESP32</title>
+
+    <link rel="stylesheet" href="reveal.js/dist/reset.css">
+    <link rel="stylesheet" href="reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="reveal.js/dist/theme/simple.css">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css">
+
+    <style>
+      td.valign {
+        vertical-align: top;
+      }
+
+      img.esplogo {
+        width: 20%;
+        float: right;
+      }
+
+      div.alignleft {
+        text-align: left;
+      }
+
+    </style>
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+      <!-- Title page -->
+        <section>
+          <h3>
+            🔒 Enabling Secure Boot (V2) on ESP32 Platforms in Development and
+            Production
+          </h3>
+
+          <div>
+            <img src="img/espressif-devcon23-square.png" alt="DevCon 2023" width="30%" />
+          </div>
+
+          Ning Shang (Thistle Technologies)
+        </section>
+
+        <section>
+          <h3>Speaker Intro <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <br />
+          <p>
+            Ning Shang (VP of Engineering, Thistle Technologies)
+          </p>
+          <ul>
+            <li>Trained in mathematics and cryptography</li>
+            <li>Experienced in building, attacking and securing hardware
+            devices and key management infrastructures in production</li>
+            <li>Working at Thistle to make hardware security easy for IoT device
+            makers</li>
+          </ul>
+
+        </section>
+
+        <section>
+          <h3>Secure Boot Intro <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            Secure boot is a boot sequence on a hardware device where each
+            software/firmware image loaded is authorized to be executed using
+            software previously authorized by this system
+            <ul>
+              <li>
+              Once enabled, secure boot ensures that only signed firmware run on
+              hardware device, preventing malware persistence at boot time
+              </li>
+              <li>
+              Secure boot needs chipset support: ESP32 platforms support it
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h3>Secure Boot Enablement <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+          On hardware supporting secure boot, the process is usually
+          <ul>
+          <li>Creation and management of firmware signing keys or PKI</li>
+          <li>Fuse programming to configure security parameters and the root-of-trust (RoT)</li>
+          <li>Properly signing of firmware images, requiring signing infrastructures</li>
+          </ul>
+
+          Secure and easy-to-use signing key management is a challenge
+          </div>
+        </section>
+
+        <section>
+          <h3>ESP32: Secure Boot V2 (SBV2) <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            <ul>
+              <li>ESP32 chips support secure boot</li>
+              <li>The preferred secure boot scheme is <a
+              href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/secure-boot-v2.html"
+              onclick="window.open(this.href); return false;">Secure Boot V2</a>
+              <ul>
+                <li>Available from ESP32 ECO 3 onwards, including ESP32-S2, ESP32-S3, etc</li>
+                <li>RSA-3072-PSS-based app and second-stage bootloader verification</li>
+              </ul>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h3>ESP32: SBV2 Boot Flows <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            At least two ESP32 secure boot flows are supported, "ESP-IDF" and "MCUboot + ZephyrOS"
+            <table>
+              <tr>
+                <td><img src="img/secure-boot-flow_esp-idf.png" alt="SBV2: ESP-IDF" /></td>
+                <td><img src="img/secure-boot-flow_esp32-mcuboot.png" alt="SBV2: MCUboot + ZephyrOS" /></td>
+              </tr>
+            </table>
+
+          </div>
+        </section>
+
+        <section>
+          <h3>How To Enable SBV2 <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div>
+            <ul>
+              <li>Generate firmware signing key (one-time effort)</li>
+              <li>Determine efuse configuration and blow efuses (one-time effort)</li>
+              <li>Sign firmware (on-going effort)</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h3>SBV2: Signing Key Generation <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <ul>
+            <li>
+              For local development and testing, use OpenSSL (or espsecure.py)
+              <div style="font-size: 0.8em;"><pre><code>
+# Generate private key
+openssl genrsa -out sbv2_private_dev.pem 3072
+# Extract public key
+openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
+              </code></pre></div>
+            </li>
+            <li>
+              For production releases, a proper key management system is desired
+              for managing private keys
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>SBV2: Efuse Config and Blowing <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            <ul>
+            <li>
+              [Error-prone] Turn on SBV2 and other hardware security features by
+              manually computing and blowing efuse bits using espefuse.py.
+            </li>
+            <li>
+              [Recommended] Sign a bootloader and app image bundle with the
+              desired private key, and flash the signed images and a valid
+              partition table to an unfused device. On first boot, efuse will be
+              blown (by IDF bootloader) to enable SBV2
+            </li>
+            </ul>
+            Once SBV2 is enabled, only signed images can boot on device
+          </div>
+        </section>
+
+        <section>
+          <h3>Firmware Signing <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            Now SBV2 enablement is largely a firmware signing and key management
+            problem
+
+            <ul>
+              <li>Development signing: Signing key confidentiality is not
+              crucial; signing process should be easy to allow fast feedback
+              loop</li>
+              <li>Production signing: Signing key is highly confidential, and
+              shall not be exposed; signing process should be easy to allow fast
+              releases</li>
+              <li>Production firmware should be a nearly faithful mirror of
+              development firmware, differing only on public keys and
+              signatures</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h3>FW Signing in Development <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            <ul>
+              <li>Generate file-based private signing key using OpenSSL or
+              espsecure.py</li>
+              <li>Use `menuconfig` to enable SBV2, configure signing key file,
+              and save "sdkconfig"</li>
+              <li>Use `idf.py build` to build and sign a <a
+              href="https://github.com/thistletech/esp32-devenvs/tree/main/esp32/apps/void_app"
+              onclick="window.open(this.href); return false;" >void app</a> with
+              the saved "sdkconfig"</li>
+            </ul>
+
+            Development signing keys aren't usually security critical, and it's
+            often OK to checked them into a version control system for easy
+            access and backup
+          </div>
+        </section>
+
+        <section>
+          <h3>"idf.py menuconfig" <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div>
+            <img src="img/menuconfig.png" alt="idf menuconfig" style="width: 50%;"/>
+          </div>
+        </section>
+
+        <section>
+          <h3>The "void app" <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft" style="font-size: 0.8em;">
+            An app that does not do anything (and thus is "void"), but can be
+            flashed on an ESP32 chip to blow security related efuses according
+            to the "sdkconfig" settings. <br />
+            A minimum "fuseblower" void app is important for production signing.
+          </div>
+          <img src="img/void_app.png" alt="Void App" style="width: 55%;" />
+        </section>
+
+        <section>
+          <h3>SBV2 Signing "1-click" Setup <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft">
+            Thistle has released Dockerfiles and pre-built Docker images to
+            allow 1-click firmware signing in development <br />
+            <a href="https://github.com/thistletech/esp32-devenvs"
+            onclick="window.open(this.href); return false;">https://github.com/thistletech/esp32-devenvs</a>
+          </div>
+          <img src="img/esp32-build-fuseblower.png" alt="Fuseblower" style="width: 60%;" />
+        </section>
+
+        <section>
+          <h3>Demo: Development Signing <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/7_HTOhubumU" title="SBV2 Signing in Development" frameborder="0" allowfullscreen></iframe>
+        </section>
+
+        <section>
+          <h3>FW Signing in Production <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft" style="font-size: 0.8em;">
+            File-based signing keys can be exposed by humans or malware, and are
+            not suitable for signing production firmware.
+          </div>
+          <img src="img/msi-key-leak.png" alt="MSI Firmware Signing Key Leak" style="width: 50%;" />
+        </section>
+
+        <section>
+          <h3>FW Signing in Production <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <div class="alignleft" style="font-size: 0.8em;">
+            <ul>
+              <li>Security requirement: Production firmware signing keys not
+              exposed to human operators or software</li>
+              <li>Usability requirement: Day-to-day signing operations be
+              frictionless</li>
+              <li>Thistle's solution: Firmware signing and patching as a service
+              using KMS-backed keys</li>
+            </ul>
+          </div>
+          <img src="img/sigblock.png" alt="ESP32 image patching" />
+        </section>
+
+        <section>
+          <h3>Prod Signing in a Nutshell <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <img src="img/pim.png" alt="Production Image Maker" style="width: 100%;" />
+          <div class="alignleft" style="font-size: 0.6em;">
+            Thistle's ESP32 production signing system supports both ESP-IDF and
+            MCUboot/ZephyrOS secure boot flows
+          </div>
+        </section>
+
+        <section>
+          <h3>Demo: Production Signing <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/PDYktNFER6k" title="SBV2 Signing in Production" frameborder="0" allowfullscreen></iframe>
+        </section>
+
+        <section>
+          <h3>Acknowledgments <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
+           <div>
+            <ul>
+              <li>Thistle Technologies for supporting this work</li>
+              <li>My Thistle colleagues for their feedback</li>
+              <li><a href="https://github.com/toru"
+              onclick="window.open(this.href); return false;"> Toru Maesaka</a>
+              and <a href="https://github.com/russellchapin"
+              onclick="window.open(this.href); return false;">Russell
+              Chapin</a>, for helping build the production firmware signing
+              service
+              </li>
+            </ul>
+          </div>
+          <img src="img/thistle-logo.png" alt="Thistle Technologies" width="25%" />
+        </section>
+
+      </div>
+    </div>
+
+    <script src="reveal.js/dist/reveal.js"></script>
+    <script src="reveal.js/plugin/notes/notes.js"></script>
+    <script src="reveal.js/plugin/markdown/markdown.js"></script>
+    <script src="reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="reveal.js/plugin/math/math.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+        center: true,
+
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX ]
+      });
+    </script>
+  </body>
+</html>

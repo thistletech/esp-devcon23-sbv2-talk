@@ -1,0 +1,33 @@
+# Sanity checks
+name: 'sanity'
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  tidy-html:
+    name: 'Tidy HTML'
+    strategy:
+      fail-fast: false
+      # Run on linux
+      matrix:
+        os:
+          - 'ubuntu-latest'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v3
+      - name: 'Install tidy on Ubuntu'
+        run: |
+          sudo apt update
+          sudo apt install tidy -y
+          tidy --version
+      - name: 'Run tidy on index.html'
+        run: |
+          set -euxo pipefail
+          cd ${{ github.workspace }}/
+          tidy -e index.html
