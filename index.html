@@ -69,7 +69,7 @@
           <ul>
             <li>Trained in mathematics and cryptography</li>
             <li>Experienced in building, attacking and securing hardware
-            devices and key management infrastructures in production</li>
+            devices and key management infrastructures in production systems</li>
             <li>Working at Thistle to make hardware security easy for IoT device
             makers</li>
           </ul>
@@ -79,18 +79,14 @@
         <section>
           <h3>Secure Boot Intro <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft">
-            A boot sequence on a hardware device where each software image
-            loaded is authorized to be executed using software previously
-            authorized by this system
             <ul>
-              <li>
-              Once enabled, secure boot ensures that only signed firmware run on
-              hardware device, preventing malware persistence at boot time
-              </li>
-              <li>
-              Secure boot needs chipset support: ESP32 platforms support it
-              </li>
+              <li>A boot sequence of software images on a hardware device</li>
+              <li>Image is executed only when authorized by previously authorized software</li>
+              <li>Authorization boils down to a root of trust (RoT) in hardware</li>
+              <li>Needs chipset support: ESP32 platforms support it</li>
             </ul>
+            Once enabled, secure boot ensures that only signed firmware run on
+            hardware device, preventing malware persistence at boot time
           </div>
         </section>
 
@@ -128,7 +124,7 @@
         <section>
           <h3>ESP32: SBV2 Boot Flows <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft">
-            At least two ESP32 secure boot flows are supported, "ESP-IDF" and "MCUboot + ZephyrOS"
+            ESP32 SBV2 suports at least two boot flows: "ESP-IDF" and "MCUboot + ZephyrOS"
             <table>
               <tr>
                 <td><img src="img/secure-boot-flow_esp-idf.png" alt="SBV2: ESP-IDF" /></td>
@@ -163,8 +159,10 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
               </code></pre></div>
             </li>
             <li>
-              For production releases, a proper key management system is desired
-              for managing private keys
+              For production releases, use a proper key management system (KMS)
+              <ul>
+                <li>E.g., AWS KMS, GCP KMS, Hardware Security Modules (HSMs)</li>
+              </ul>
             </li>
           </ul>
         </section>
@@ -191,7 +189,7 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
         <section>
           <h3>Firmware Signing <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft">
-            Now SBV2 enablement is largely a firmware signing and key management
+            SBV2 enablement is largely a firmware signing and key management
             problem
 
             <ul>
@@ -211,6 +209,7 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
         <section>
           <h3>FW Signing in Development <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft">
+            Steps:
             <ul>
               <li>Generate file-based private signing key using OpenSSL or
               espsecure.py</li>
@@ -230,8 +229,10 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
 
         <section>
           <h3>"idf.py menuconfig" <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
-          <div>
-            <img src="img/menuconfig.png" alt="idf menuconfig" style="width: 50%;"/>
+          <div style="font-size: 0.4em;">
+            <img src="img/menuconfig.png" alt="idf menuconfig" style="width: 50%;"/><br />
+            We also recommend to disable JTAG but enable secure ROM download
+            mode (when available)
           </div>
         </section>
 
@@ -249,8 +250,9 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
         <section>
           <h3>SBV2 Signing "1-click" Setup <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft">
-            Thistle has released Dockerfiles and pre-built Docker images to
-            allow 1-click firmware signing in development <br />
+            Thistle has released developer tools including Dockerfiles and
+            pre-built Docker images to allow 1-click firmware signing in
+            development <br />
             <a href="https://github.com/thistletech/esp32-devenvs"
             onclick="window.open(this.href); return false;">https://github.com/thistletech/esp32-devenvs</a>
           </div>
@@ -266,7 +268,7 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
           <h3>FW Signing in Production <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft" style="font-size: 0.8em;">
             File-based signing keys can be exposed by humans or malware, and are
-            not suitable for signing production firmware.
+            not suitable for production firmware signing
           </div>
           <img src="img/msi-key-leak.png" alt="MSI Firmware Signing Key Leak" style="width: 50%;" />
         </section>
@@ -275,12 +277,20 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
           <h3>FW Signing in Production <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <div class="alignleft" style="font-size: 0.8em;">
             <ul>
-              <li>Security requirement: Production firmware signing keys not
-              exposed to human operators or software</li>
-              <li>Usability requirement: Day-to-day signing operations be
-              frictionless</li>
+              <li>Requirements
+                <ul>
+                  <li>Security: Production firmware signing keys not
+                  exposed to human operators or software</li>
+                  <li>Usability: Day-to-day signing operations be
+                  frictionless</li>
+                </ul>
+              </li>
               <li>Thistle's solution: Firmware signing and patching as a service
-              using KMS-backed keys</li>
+              using KMS-backed production signing keys
+              <ul>
+                <li>No one, including Thistle, has access to the keys</li>
+              </ul>
+              </li>
             </ul>
           </div>
           <img src="img/sigblock.png" alt="ESP32 image patching" />
@@ -290,7 +300,7 @@ openssl rsa -in sbv2_private_dev.pem -pubout > sbv2_public_dev.pem
           <h3>Prod Signing in a Nutshell <img src="img/devcon-logo.svg" alt="DevCon Logo" class="esplogo" /></h3>
           <img src="img/pim.png" alt="Production Image Maker" style="width: 100%;" />
           <div class="alignleft" style="font-size: 0.6em;">
-            Thistle's ESP32 production signing system supports both ESP-IDF and
+            Thistle's ESP32 SBV2 production signing system supports both ESP-IDF and
             MCUboot/ZephyrOS secure boot flows
           </div>
         </section>
